@@ -1,5 +1,7 @@
 package org.praytimes;
 
+import java.text.DecimalFormat;
+
 /**
  * Helper class based on <a href="http://praytimes.org">PrayTimes.js</a>.
  *
@@ -9,7 +11,6 @@ package org.praytimes;
 public class Util {
 
 	private Util() {
-
 	}
 
 	/**
@@ -20,22 +21,10 @@ public class Util {
 	 * @return Time in 24h format
 	 */
 	public static String floatToTime24(double time) {
-		String result;
+		DayTime dt = toDayTime(time, true);
+		DecimalFormat f = new DecimalFormat("00");
 
-		time = DMath.fixHour(time + 0.5 / 60.0); // add 0.5 minutes to round
-		int hours = (int) Math.floor(time);
-		double minutes = Math.floor((time - hours) * 60.0);
-
-		if (hours >= 0 && hours <= 9 && minutes >= 0 && minutes <= 9) {
-			result = "0" + hours + ":0" + Math.round(minutes);
-		} else if (hours >= 0 && hours <= 9) {
-			result = "0" + hours + ":" + Math.round(minutes);
-		} else if (minutes >= 0 && minutes <= 9) {
-			result = hours + ":0" + Math.round(minutes);
-		} else {
-			result = hours + ":" + Math.round(minutes);
-		}
-		return result;
+		return f.format(dt.hours) + ":" + f.format(dt.minutes);
 	}
 
 	/**
@@ -48,34 +37,62 @@ public class Util {
 	 * @return Time in 12h format
 	 */
 	public static String floatToTime12(double time, boolean noSuffix) {
-		time = DMath.fixHour(time + 0.5 / 60); // add 0.5 minutes to round
-		int hours = (int) Math.floor(time);
-		double minutes = Math.floor((time - hours) * 60);
-		String suffix, result;
-		if (hours >= 12) {
+		DayTime dt = toDayTime(time, true);
+
+		String suffix;
+		if (dt.hours >= 12) {
 			suffix = "pm";
 		} else {
 			suffix = "am";
 		}
-		hours = (hours + 12 - 1) % 12 + 1;
-		/*
-		 * hours = (hours + 12) - 1; int hrs = (int) hours % 12; hrs += 1;
-		 */
+		int hours = (dt.hours + 12 - 1) % 12 + 1;
 
-		if (hours >= 0 && hours <= 9 && minutes >= 0 && minutes <= 9) {
-			result = "0" + hours + ":0" + Math.round(minutes);
-		} else if (hours >= 0 && hours <= 9) {
-			result = "0" + hours + ":" + Math.round(minutes);
-		} else if (minutes >= 0 && minutes <= 9) {
-			result = hours + ":0" + Math.round(minutes);
-		} else {
-			result = hours + ":" + Math.round(minutes);
+		DecimalFormat f = new DecimalFormat("00");
+		return f.format(hours) + ":" + f.format(dt.minutes) + (noSuffix ? "" : " " + suffix);
+	}
+
+	/**
+	 * Get day time
+	 *
+	 * @param time
+	 *            Time to convert
+	 * @param ignoreSeconds
+	 *            If true then time will be added half minute.
+	 * @return Day time
+	 */
+	public static DayTime toDayTime(double time, boolean ignoreSeconds) {
+		// add 0.5 minutes to round
+		time = DMath.fixHour(time + (ignoreSeconds ? 0.5 / 60 : 0));
+
+		int hours = (int) Math.floor(time); // 2
+		int minutes = (int) Math.floor((time - hours) * 60);
+		int seconds = 0;
+		if (!ignoreSeconds)  {
+			seconds = (int) Math.floor(((time - hours) * 60 - minutes) * 60);
 		}
 
-		if (!noSuffix) {
-			result += suffix;
+		return new DayTime(hours, minutes, seconds);
+	}
+
+	public static class DayTime {
+		int hours, minutes, seconds;
+
+		public DayTime(int hours, int minutes, int seconds) {
+			this.hours = hours;
+			this.minutes = minutes;
+			this.seconds = seconds;
 		}
 
-		return result;
+		public int getHours() {
+			return hours;
+		}
+
+		public int getMinutes() {
+			return minutes;
+		}
+
+		public int getSeconds() {
+			return seconds;
+		}
 	}
 }
