@@ -17,10 +17,14 @@ import org.praytimes.Method.MidnightMethod;
  * <p>
  * <strong>Usage:</strong><br/>
  * <code>
- * PrayTimes pt = new PrayTimes(Method.ISNA);<br/>
+ * {@link PrayTimes} pt = new {@link PrayTimes}({@link Method#ISNA});<br/>
+ * pt.adjustMinutes({@link Time#MAGHRIB}, 1);<br/>
+ * pt.adjustAngle({@link Time#ISHA}, 18);<br/>
+ * pt.tuneOffset({@link Time#FAJR}, 2);<br/>
+ * <br/>
  * Map<Time, Double> times = pt.getTimes(new GregorianCalendar(2009, 2, 27), new Location(-6.1744444, 106.8294444, 10));<br/>
- * for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR, Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) { <br/>
- * &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(t + " : " + Util.floatToTime12(times.get(t), false)); <br/>
+ * for ({@link Time} t : new {@link Time}[] { {@link Time#FAJR}, {@link Time#SUNRISE}, {@link Time#DHUHR}, {@link Time#ASR}, {@link Time#MAGHRIB}, {@link Time#ISHA} }) { <br/>
+ * &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(t + " : " + {@link Util}.toTime12(times.get(t), false)); <br/>
  * }
  * </code>
  * </p>
@@ -438,7 +442,7 @@ public class PrayTimes {
 			for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
 					Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
 				System.out.print(t + " : "
-						+ Util.floatToTime12(times.get(t), false));
+						+ Util.toTime12(times.get(t), false));
 				System.out.print(",");
 			}
 			System.out.println();
@@ -454,7 +458,7 @@ public class PrayTimes {
 		for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
 				Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
 			System.out.println(t + " : "
-					+ Util.floatToTime12(times.get(t), false));
+					+ Util.toTime12(times.get(t), false));
 		}
 	}
 }

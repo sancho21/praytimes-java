@@ -14,13 +14,13 @@ public class Util {
 	}
 
 	/**
-	 * Convert double hours to 24h format
+	 * Convert hours to 24h format
 	 *
 	 * @param time
 	 *            Time to convert
 	 * @return Time in 24h format
 	 */
-	public static String floatToTime24(double time) {
+	public static String toTime24(double time) {
 		DayTime dt = toDayTime(time, true);
 		DecimalFormat f = new DecimalFormat("00");
 
@@ -28,7 +28,7 @@ public class Util {
 	}
 
 	/**
-	 * Convert double hours to 12h format
+	 * Convert hours to 12h format
 	 *
 	 * @param time
 	 *            Time to convert
@@ -36,7 +36,7 @@ public class Util {
 	 *            If false, then "pm" or "am" is added
 	 * @return Time in 12h format
 	 */
-	public static String floatToTime12(double time, boolean noSuffix) {
+	public static String toTime12(double time, boolean noSuffix) {
 		DayTime dt = toDayTime(time, true);
 
 		String suffix;
@@ -75,7 +75,7 @@ public class Util {
 	}
 
 	public static class DayTime {
-		int hours, minutes, seconds;
+		private final int hours, minutes, seconds;
 
 		public DayTime(int hours, int minutes, int seconds) {
 			this.hours = hours;
