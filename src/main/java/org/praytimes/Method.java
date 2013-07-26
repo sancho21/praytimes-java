@@ -145,7 +145,6 @@ public class Method {
 		minutes = new HashMap<PrayTimes.Time, Integer>();
 
 		// Base values for all methods
-		setMinutes(Time.MAGHRIB, 0);
 		setMidnightMethod(MidnightMethod.STANDARD);
 	}
 

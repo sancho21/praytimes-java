@@ -1,0 +1,19 @@
+# Info: PrayTimes.js.10years.txt was created at 24July13 in BSD Tangerang:
+# 
+#     tzo = '7';
+#
+#     prayTimes.adjust({
+#         fajr: 20,
+#         dhuhr: '2 min',
+#         maghrib: 1,
+#         isha: 18
+#     })
+#     prayTimes.tune({
+#         fajr: 2,
+#         sunrise: -2,
+#         asr: 2,
+#         maghrib: 2,
+#         isha: 2
+#     })
+#     times = prayTimes.getTimes(tgl, [-6.1744444, 106.8294444], tzo, 0, '24h')
+#

@@ -24,7 +24,7 @@ import org.praytimes.Method.MidnightMethod;
  * <br/>
  * Map<Time, Double> times = pt.getTimes(new GregorianCalendar(2009, 2, 27), new Location(-6.1744444, 106.8294444, 10));<br/>
  * for ({@link Time} t : new {@link Time}[] { {@link Time#FAJR}, {@link Time#SUNRISE}, {@link Time#DHUHR}, {@link Time#ASR}, {@link Time#MAGHRIB}, {@link Time#ISHA} }) { <br/>
- * &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(t + " : " + {@link Util}.toTime12(times.get(t), false)); <br/>
+ * &nbsp;&nbsp;&nbsp;&nbsp;// System.out.println(t + " : " + {@link Util}.toTime12(times.get(t), false)); <br/>
  * }
  * </code>
  * </p>
@@ -44,6 +44,10 @@ public class PrayTimes {
 	private double lat, lng, elv, jDate;
 	private int timeZone;
 
+	public PrayTimes() {
+		this(Method.MWL);
+	}
+
 	public PrayTimes(Method calculationMethod) {
 		method = calculationMethod.clone();
 
@@ -59,9 +63,6 @@ public class PrayTimes {
 
 		// Default offsets
 		offsets = new HashMap<Time, Integer>();
-		for (Time t : Time.values()) {
-			offsets.put(t, 0);
-		}
 	}
 
 	public Method getMethod() {
@@ -155,6 +156,7 @@ public class PrayTimes {
 		lat = location.getLat();
 		lng = location.getLng();
 		elv = location.getElv();
+
 		timeZone = date.getTimeZone().getRawOffset() / 3600000;
 
 		jDate = julian(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1,
@@ -168,6 +170,7 @@ public class PrayTimes {
 	// compute mid-day time
 	private double midDay(double time) {
 		double eqt = sunPosition(jDate + time).equation;
+		// System.out.println("eqt = " + eqt);
 		double noon = DMath.fixHour(12 - eqt);
 		return noon;
 	}
@@ -191,7 +194,7 @@ public class PrayTimes {
 
 	// compute declination angle of sun and equation of time
 	// Ref: http://aa.usno.navy.mil/faq/docs/SunApprox.php
-	private SunPosition sunPosition(double julianDate) {
+	private static SunPosition sunPosition(double julianDate) {
 		double d = julianDate - 2451545.0;
 
 		double g = DMath.fixAngle(357.529 + 0.98560028 * d);
@@ -201,7 +204,6 @@ public class PrayTimes {
 
 		double e = 23.439 - 0.00000036 * d;
 		double RA = DMath.arctan2(DMath.cos(e) * DMath.sin(L), DMath.cos(L)) / 15;
-
 		double decl = DMath.arcsin(DMath.sin(e) * DMath.sin(L)); // declination of the Sun
 		double eqt = q / 15 - DMath.fixHour(RA); // equation of time
 
@@ -289,7 +291,6 @@ public class PrayTimes {
 
 	// adjust times
 	private void adjustTimes(Map<Time, Double> times) {
-
 		for (Entry<Time, Double> time : times.entrySet()) {
 			times.put(time.getKey(), time.getValue() + timeZone - lng / 15);
 		}
@@ -301,10 +302,11 @@ public class PrayTimes {
 			times.put(Time.IMSAK,
 					times.get(Time.FAJR) - method.getMinute(Time.IMSAK) / 60d);
 
-		if (method.getMinute(Time.MAGHRIB) != null)
+		if (method.getMinute(Time.MAGHRIB) != null) {
 			times.put(Time.MAGHRIB,
 					times.get(Time.SUNSET) + method.getMinute(Time.MAGHRIB)
 							/ 60d);
+		}
 
 		if (method.getMinute(Time.ISHA) != null)
 			times.put(Time.ISHA,
@@ -314,8 +316,11 @@ public class PrayTimes {
 			times.put(Time.DHUHR,
 					times.get(Time.DHUHR) + method.getMinute(Time.DHUHR) / 60d);
 
-		// TODO: If you look at the original Javascript version, the creator
-		// uses eval to assume minutes as angle. I don't know what's his base.
+		// TODO: Info = Double di JS lebih panjang 1 digit presisi:
+		// Java = 12.02000680274645
+		// JS	= 12.020006802746453
+		// System.out.println("params.dhuhr = " + method.getMinute(Time.DHUHR));
+		// System.out.println("times.dhuhr = " + times.get(Time.DHUHR));
 	}
 
 	private Map<Time, Double> clone(Map<Time, Double> times) {
@@ -338,8 +343,11 @@ public class PrayTimes {
 		times = clone(times);
 
 		for (Entry<Time, Double> time : times.entrySet()) {
-			times.put(time.getKey(),
-					time.getValue() + offsets.get(time.getKey()) / 60d);
+			Integer off = offsets.get(time.getKey());
+
+			if (off != null) {
+				times.put(time.getKey(), time.getValue() + off / 60d);
+			}
 		}
 
 		return times;
@@ -407,8 +415,13 @@ public class PrayTimes {
 
 
 	/* Test drive ----------------------------------------------------------- */
-
+// TODO: method sunPosition tidak sama!!!
 	public static void main(String[] args) {
+		double x = sunPosition(2456497.2032515435 + 0.25).equation;
+		System.out.println("X = " + x);
+	}
+
+	public static void main2(String[] args) {
 		PrayTimes pt = new PrayTimes(Method.ISNA);
 		pt.adjustAngle(Time.FAJR, 20);
 		pt.adjustMinutes(Time.DHUHR, 2);
@@ -442,10 +455,10 @@ public class PrayTimes {
 			for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
 					Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
 				System.out.print(t + " : "
-						+ Util.toTime12(times.get(t), false));
+					+ Util.toTime12(times.get(t), false));
 				System.out.print(",");
 			}
-			System.out.println();
+			// System.out.println();
 
 			cal.add(Calendar.DAY_OF_MONTH, 1);
 		}

@@ -1,4 +1,5 @@
 package org.praytimes;
+//import static java.lang.Math.toRadians;
 
 /**
  * Helper class based on <a href="http://praytimes.org">PrayTimes.js</a>.
@@ -13,15 +14,19 @@ public class DMath {
 	}
 
 	public static double sin(double d) {
-		return Math.sin(Math.toRadians(d));
+		return Math.sin(toRadians(d));
 	}
 
 	public static double cos(double d) {
-		return Math.cos(Math.toRadians(d));
+		return Math.cos(toRadians(d));
+	}
+
+	private static double toRadians(double d) {
+		return (d * Math.PI) / 180.0;
 	}
 
 	public static double tan(double d) {
-		return Math.tan(Math.toRadians(d));
+		return Math.tan(toRadians(d));
 	}
 
 	public static double arcsin(double d) {
