@@ -1,5 +1,8 @@
 package org.praytimes;
 
+import static org.praytimes.Configuration.angle;
+import static org.praytimes.Configuration.minutes;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,35 +53,35 @@ public class Method {
 
 	static {
 		MWL = new Method("Muslim World League");
-		MWL.setAngle(Time.FAJR, 18);
-		MWL.setAngle(Time.ISHA, 17);
+		MWL.configure(Time.FAJR, angle(18));
+		MWL.configure(Time.ISHA, angle(17));
 
 		ISNA = new Method("Islamic Society of North America (ISNA)");
-		ISNA.setAngle(Time.FAJR, 15);
-		ISNA.setAngle(Time.ISHA, 15);
+		ISNA.configure(Time.FAJR, angle(15));
+		ISNA.configure(Time.ISHA, angle(15));
 
 		EGYPT = new Method("Egyptian General Authority of Survey");
-		EGYPT.setAngle(Time.FAJR, 19.5);
-		EGYPT.setAngle(Time.ISHA, 17.5);
+		EGYPT.configure(Time.FAJR, angle(19.5));
+		EGYPT.configure(Time.ISHA, angle(17.5));
 
 		MAKKAH = new Method("Umm Al-Qura University, Makkah");
-		MAKKAH.setAngle(Time.FAJR, 18.5);
-		MAKKAH.setMinutes(Time.ISHA, 90);
+		MAKKAH.configure(Time.FAJR, angle(18.5));
+		MAKKAH.configure(Time.ISHA, minutes(90));
 
 		KARACHI = new Method("University of Islamic Sciences, Karachi");
-		KARACHI.setAngle(Time.FAJR, 18);
-		KARACHI.setAngle(Time.ISHA, 18);
+		KARACHI.configure(Time.FAJR, angle(18));
+		KARACHI.configure(Time.ISHA, angle(18));
 
 		TEHRAN = new Method("Institute of Geophysics, University of Tehran");
-		TEHRAN.setAngle(Time.FAJR, 17.7);
-		TEHRAN.setAngle(Time.ISHA, 14);
-		TEHRAN.setAngle(Time.MAGHRIB, 4.5);
+		TEHRAN.configure(Time.FAJR, angle(17.7));
+		TEHRAN.configure(Time.ISHA, angle(14));
+		TEHRAN.configure(Time.MAGHRIB, angle(4.5));
 		TEHRAN.setMidnightMethod(MidnightMethod.JAFARI);
 
 		JAFARI = new Method("Shia Ithna-Ashari, Leva Institute, Qum");
-		JAFARI.setAngle(Time.FAJR, 16);
-		JAFARI.setAngle(Time.ISHA, 14);
-		JAFARI.setAngle(Time.MAGHRIB, 4);
+		JAFARI.configure(Time.FAJR, angle(16));
+		JAFARI.configure(Time.ISHA, angle(14));
+		JAFARI.configure(Time.MAGHRIB, angle(4));
 		JAFARI.setMidnightMethod(MidnightMethod.JAFARI);
 	}
 
@@ -133,19 +136,18 @@ public class Method {
 
 	private final String name;
 
-	private final Map<Time, Double> angles;
-	private final Map<Time, Integer> minutes; // added into final angles
+	private final Map<Time, Configuration> configurations;
 	private double asrFactor;
 	private MidnightMethod midnightMethod;
 	private HighLatMethod highLatMethod;
 
 	public Method(String name) {
 		this.name = name;
-		angles = new HashMap<PrayTimes.Time, Double>();
-		minutes = new HashMap<PrayTimes.Time, Integer>();
+		configurations = new HashMap<PrayTimes.Time, Configuration>();
 
 		// Base values for all methods
 		setMidnightMethod(MidnightMethod.STANDARD);
+		configure(Time.MAGHRIB, minutes(0));
 	}
 
 	public String getName() {
@@ -160,7 +162,8 @@ public class Method {
 	 * Set Asr factor for shadow.
 	 *
 	 * @param factor
-	 *            The factor could be {@link #ASR_FACTOR_STANDARD}, {@link #ASR_FACTOR_HANAFI}.
+	 *            The factor could be {@link #ASR_FACTOR_STANDARD},
+	 *            {@link #ASR_FACTOR_HANAFI}.
 	 */
 	public void setAsrFactor(double factor) {
 		this.asrFactor = factor;
@@ -182,55 +185,21 @@ public class Method {
 		this.highLatMethod = highLatMethod;
 	}
 
-	public void copyFrom(Method method) {
-		angles.putAll(method.angles);
-
-		if (method.midnightMethod != null) {
-			setMidnightMethod(method.midnightMethod);
-		}
-	}
-
 	/**
-	 * Get twilight angle of specific time
+	 * Get configuration value
 	 *
 	 * @param time
 	 *            Time to adjust the angle
 	 * @return Angle in degree
 	 */
-	public Double getAngle(Time time) {
-		return angles.get(time);
+	public Double getConfigurationValue(Time time) {
+		return configurations.get(time) != null ? configurations.get(time)
+				.getValue() : null;
 	}
 
 	/**
-	 * Set twilight angle of specific time
 	 *
-	 * @param time
-	 *            Time to adjust the angle
-	 * @param angle
-	 *            angle in degree
-	 */
-	public void setAngle(Time time, double angle) {
-		if (time != Time.IMSAK && time != Time.FAJR && time != Time.MAGHRIB
-				&& time != Time.ISHA) {
-			throw new IllegalArgumentException("Can not set angle for " + time);
-		}
-
-		angles.put(time, angle);
-	}
-
-	/**
-	 * Get minute difference.
-	 *
-	 * @param time
-	 *            Time to adjust the minutes.
-	 * @return Minute difference
-	 */
-	public Integer getMinute(Time time) {
-		return minutes.get(time);
-	}
-
-	/**
-	 * Set minute difference of specific time.
+	 * Set minute difference of specific time or twilight angle.
 	 * <ul>
 	 * <li>As for {@link PrayTimes.Time#IMSAK}: Minutes before fajr</li>
 	 * <li>As for {@link PrayTimes.Time#DHUHR}: Minutes after mid-day</li>
@@ -240,31 +209,50 @@ public class Method {
 	 *
 	 * @param time
 	 *            Time to adjust the minutes. The valid times are
-	 *            {@link PrayTimes.Time#IMSAK}, {@link PrayTimes.Time#DHUHR}, {@link PrayTimes.Time#MAGHRIB}
-	 *            and {@link PrayTimes.Time#ISHA}.
-	 * @param minutes
-	 *            Minute difference
+	 *            {@link PrayTimes.Time#IMSAK}, {@link PrayTimes.Time#DHUHR},
+	 *            {@link PrayTimes.Time#MAGHRIB} and {@link PrayTimes.Time#ISHA}
+	 * @param configuration
+	 *            angle in degree
 	 */
-	public void setMinutes(Time time, int minutes) {
-		if (time != Time.IMSAK && time != Time.DHUHR && time != Time.MAGHRIB
-				&& time != Time.ISHA) {
+	public void configure(Time time, Configuration configuration) {
+		validateConfiguration(time, configuration);
+		configurations.put(time, configuration);
+	}
+
+	private void validateConfiguration(Time time, Configuration configuration) {
+		if (configuration.getType() == Configuration.TYPE_ANGLE
+				&& time != Time.IMSAK && time != Time.FAJR
+				&& time != Time.MAGHRIB && time != Time.ISHA) {
+			throw new IllegalArgumentException("Can not set angle for " + time);
+		}
+
+		if (configuration.getType() == Configuration.TYPE_MINUTE
+				&& time != Time.IMSAK && time != Time.DHUHR
+				&& time != Time.MAGHRIB && time != Time.ISHA) {
 			throw new IllegalArgumentException("Can not set minutes for "
 					+ time);
 		}
+	}
 
-		this.minutes.put(time, minutes);
-		// setAngle(time, minute / 60d);
+	public boolean hasMinuteConfiguration(Time time) {
+		Configuration conf = configurations.get(time);
+		return conf != null && conf.getType() == Configuration.TYPE_MINUTE;
+	}
+
+	public Configuration getConfiguration(Time time) {
+		return configurations.get(time);
 	}
 
 	@Override
 	public Method clone() {
 		Method m = new Method(name);
-		m.angles.clear();
-		m.angles.putAll(angles);
+		m.configurations.clear();
+		m.configurations.putAll(configurations);
 
 		m.asrFactor = asrFactor;
 		m.midnightMethod = midnightMethod;
 		m.highLatMethod = highLatMethod;
 		return m;
 	}
+
 }

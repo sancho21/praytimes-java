@@ -3,12 +3,18 @@ package org.praytimes;
 import static java.util.Calendar.JANUARY;
 import static java.util.Calendar.JULY;
 import static org.junit.Assert.assertEquals;
+import static org.praytimes.Configuration.angle;
+import static org.praytimes.Configuration.minutes;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.junit.Test;
 import org.praytimes.PrayTimes.Time;
@@ -22,10 +28,10 @@ public class PrayTimesTestCase {
 	@Test
 	public void shouldWork() {
 		PrayTimes pt = new PrayTimes(Method.ISNA);
-		pt.adjustAngle(Time.FAJR, 20);
-		pt.adjustMinutes(Time.DHUHR, 2);
-		pt.adjustMinutes(Time.MAGHRIB, 1);
-		pt.adjustAngle(Time.ISHA, 18);
+		pt.adjust(Time.FAJR, angle(20));
+		pt.adjust(Time.DHUHR, minutes(2));
+		pt.adjust(Time.MAGHRIB, minutes(1));
+		pt.adjust(Time.ISHA, angle(18));
 
 		pt.tuneOffset(Time.FAJR, 2);
 		pt.tuneOffset(Time.SUNRISE, -2);
@@ -45,44 +51,89 @@ public class PrayTimesTestCase {
 		assertEquals("07:32 pm", Util.toTime12(times.get(Time.ISHA), false));
 	}
 
+
 	@Test
+	public void shouldBeTheSameWithJsVersion_Default() throws Exception {
+		String sampleFile = "src/test/file/sample-00.txt";
+		GregorianCalendar cal = new GregorianCalendar(2013, JULY, 24);
+		cal.setTimeZone(TimeZone.getTimeZone("GMT-5")); // -5
+		assertEquals(-5, cal.getTimeZone().getRawOffset() / 3600000);
+		Location location = new Location(43, -80);
+
+		// Nothing to adjust
+		Map<Time, Configuration> adjustments = new HashMap<Time, Configuration>();
+		// No offsets
+		Map<Time, Integer> offsets = new HashMap<Time, Integer>();
+
+		commonTest(sampleFile, cal, location, adjustments, offsets);
+	}
+
+	@Test // Indonesia real calculation
 	public void shouldBeTheSameWithJsVersion() throws Exception {
-		BufferedReader reader = new BufferedReader(new FileReader("src/test/file/PrayTimes.js.10years.txt"));
-		String line;
-
-		PrayTimes pt = new PrayTimes();
-		pt.adjustAngle(Time.FAJR, 20);
-		pt.adjustMinutes(Time.DHUHR, 2);
-		pt.adjustAngle(Time.MAGHRIB, 1);
-		pt.adjustAngle(Time.ISHA, 18);
-
-		pt.tuneOffset(Time.FAJR, 2);
-		pt.tuneOffset(Time.SUNRISE, -2);
-		pt.tuneOffset(Time.ASR, 2);
-		pt.tuneOffset(Time.MAGHRIB, 2);
-		pt.tuneOffset(Time.ISHA, 2);
-
+		String sampleFile = "src/test/file/sample-01.txt";
 		GregorianCalendar cal = new GregorianCalendar(2013, JULY, 24);
 		Location location = new Location(-6.1744444, 106.8294444);
 
+		Map<Time, Configuration> adjustments = new HashMap<Time, Configuration>();
+		adjustments.put(Time.FAJR, angle(20));
+		adjustments.put(Time.DHUHR, minutes(2));
+		adjustments.put(Time.MAGHRIB, angle(1));
+		adjustments.put(Time.ISHA, angle(18));
+
+		Map<Time, Integer> offsets = new HashMap<Time, Integer>();
+		offsets.put(Time.FAJR, 2);
+		offsets.put(Time.SUNRISE, -2);
+		offsets.put(Time.ASR, 2);
+		offsets.put(Time.MAGHRIB, 2);
+		offsets.put(Time.ISHA, 2);
+
+		commonTest(sampleFile, cal, location, adjustments, offsets);
+	}
+
+	@Test
+	public void shouldBeTheSameWithJsVersion_Sample2() throws Exception {
+		String sampleFile = "src/test/file/sample-02.txt";
+		GregorianCalendar cal = new GregorianCalendar(2013, JULY, 24);
+		cal.setTimeZone(TimeZone.getTimeZone("GMT-5")); // -5
+		assertEquals(-5, cal.getTimeZone().getRawOffset() / 3600000);
+
+		Location location = new Location(43, -80);
+
+		Map<Time, Configuration> adjustments = new HashMap<Time, Configuration>();
+		adjustments.put(Time.FAJR, angle(19));
+		adjustments.put(Time.DHUHR, minutes(5));
+		adjustments.put(Time.MAGHRIB, angle(2));
+		adjustments.put(Time.ISHA, angle(15));
+
+		Map<Time, Integer> offsets = new HashMap<Time, Integer>();
+		offsets.put(Time.FAJR, 2);
+
+		commonTest(sampleFile, cal, location, adjustments, offsets);
+	}
+
+	private void commonTest(String sampleFile, GregorianCalendar cal,
+			Location location, Map<Time, Configuration> adjustments,
+			Map<Time, Integer> offsets) throws FileNotFoundException,
+			IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(sampleFile));
+		String line;
+
+		PrayTimes pt = new PrayTimes();
+		pt.adjust(adjustments);
+		pt.tuneOffset(offsets);
+
 		int day = 1;
 		while ((line = reader.readLine()) != null) {
-			String[] splits = line.split("\\ : ");
-			splits = splits[1].split(" \\| ");
+			String[] splits = line.split(" \\| ");
 
-			String fajr = splits[0].trim();
-			String sunrise = splits[1].trim();
-			String dhuhr = splits[2].trim();
-			String asr = splits[3].trim();
-			String maghrib = splits[4].trim();
-			String isha = splits[5].trim();
+			String fajr = splits[1];
+			String sunrise = splits[2];
+			String dhuhr = splits[3];
+			String asr = splits[4];
+			String maghrib = splits[5];
+			String isha = splits[6];
 
 			Map<Time, Double> times = pt.getTimes(cal, location);
-
-//			for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
-//					Time.ASR, Time.MAGHRIB, Time.ISHA }) {
-//				System.out.println(times.get(t));
-//			}
 
 			String info = "Failed at day " + day + ": " + cal.getTime();
 			assertEquals(info, fajr, Util.toTime24(times.get(Time.FAJR)));

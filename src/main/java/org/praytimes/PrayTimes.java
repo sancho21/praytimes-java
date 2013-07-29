@@ -1,5 +1,8 @@
 package org.praytimes;
 
+import static org.praytimes.Configuration.angle;
+import static org.praytimes.Configuration.minutes;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -12,7 +15,9 @@ import org.praytimes.Method.MidnightMethod;
 
 /**
  * <p>
- * Pray times calculator based on <a href="http://praytimes.org">PrayTimes.js</a>: Prayer Times Calculator (ver 2.3).
+ * Pray times calculator based on <a
+ * href="http://praytimes.org">PrayTimes.js</a>: Prayer Times Calculator (ver
+ * 2.3).
  * </p>
  * <p>
  * <strong>Usage:</strong><br/>
@@ -49,19 +54,14 @@ public class PrayTimes {
 	}
 
 	public PrayTimes(Method calculationMethod) {
+		// Create a method which is modifiable
 		method = calculationMethod.clone();
 
-		method.setMinutes(Time.IMSAK, 10);
-		method.setMinutes(Time.DHUHR, 0);
+		method.configure(Time.IMSAK, minutes(10));
+		method.configure(Time.DHUHR, minutes(0));
 		method.setAsrFactor(Method.ASR_FACTOR_STANDARD);
 		method.setHighLatMethod(HighLatMethod.NIGHT_MIDDLE);
 
-		// TODO: This is to fix "eval to assume minutes as angle". I don't know
-		// if this is correct.
-		method.setAngle(Time.IMSAK, 10);
-		method.setAngle(Time.MAGHRIB, 1);
-
-		// Default offsets
 		offsets = new HashMap<Time, Integer>();
 	}
 
@@ -69,36 +69,8 @@ public class PrayTimes {
 		return method;
 	}
 
-	/**
-	 * Adjust minute difference of specific time.
-	 * <ul>
-	 * <li>As for {@link Time#IMSAK}: Minutes before fajr</li>
-	 * <li>As for {@link Time#DHUHR}: Minutes after mid-day</li>
-	 * <li>As for {@link Time#MAGHRIB}: Minutes after sunset</li>
-	 * <li>As for {@link Time#ISHA}: Minutes after maghrib</li>
-	 * </ul>
-	 *
-	 * @param time
-	 *            Time to adjust the minutes. The valid times are
-	 *            {@link Time#IMSAK}, {@link Time#DHUHR}, {@link Time#MAGHRIB}
-	 *            and {@link Time#ISHA}.
-	 * @param minutes
-	 *            Minute difference
-	 */
-	public void adjustMinutes(Time time, int minutes) {
-		method.setMinutes(time, minutes);
-	}
-
-	/**
-	 * Set twilight angle of specific time
-	 *
-	 * @param time
-	 *            Time to adjust the angle
-	 * @param angle
-	 *            angle in degree
-	 */
-	public void adjustAngle(Time time, double angle) {
-		method.setAngle(time, angle);
+	public void adjust(Time time, Configuration configuration) {
+		method.configure(time, configuration);
 	}
 
 	/**
@@ -117,7 +89,8 @@ public class PrayTimes {
 	 * Set Asr factor for shadow.
 	 *
 	 * @param factor
-	 *            The factor could be {@link Method#ASR_FACTOR_STANDARD}, {@link Method#ASR_FACTOR_HANAFI}.
+	 *            The factor could be {@link Method#ASR_FACTOR_STANDARD},
+	 *            {@link Method#ASR_FACTOR_HANAFI}.
 	 */
 	public void setAsrFactor(double factor) {
 		method.setAsrFactor(factor);
@@ -165,7 +138,7 @@ public class PrayTimes {
 		return computeTimes();
 	}
 
-	//---------------------- Calculation Functions -----------------------
+	// ---------------------- Calculation Functions -----------------------
 
 	// compute mid-day time
 	private double midDay(double time) {
@@ -204,7 +177,9 @@ public class PrayTimes {
 
 		double e = 23.439 - 0.00000036 * d;
 		double RA = DMath.arctan2(DMath.cos(e) * DMath.sin(L), DMath.cos(L)) / 15;
-		double decl = DMath.arcsin(DMath.sin(e) * DMath.sin(L)); // declination of the Sun
+		double decl = DMath.arcsin(DMath.sin(e) * DMath.sin(L)); // declination
+																	// of the
+																	// Sun
 		double eqt = q / 15 - DMath.fixHour(RA); // equation of time
 
 		return new SunPosition(decl, eqt);
@@ -235,8 +210,7 @@ public class PrayTimes {
 				+ Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
 	}
 
-
-	//---------------------- Compute Prayer Times -----------------------
+	// ---------------------- Compute Prayer Times -----------------------
 
 	// compute prayer times at given julian date
 	private Map<Time, Double> computePrayerTimes(Map<Time, Double> times) {
@@ -244,14 +218,29 @@ public class PrayTimes {
 
 		Map<Time, Double> compResult = new HashMap<Time, Double>();
 
-		compResult.put(Time.IMSAK, sunAngleTime(method.getAngle(Time.IMSAK), times.get(Time.IMSAK), true));
-		compResult.put(Time.FAJR, sunAngleTime(method.getAngle(Time.FAJR), times.get(Time.FAJR), true));
-		compResult.put(Time.SUNRISE, sunAngleTime(riseSetAngle(), times.get(Time.SUNRISE), true));
+		compResult.put(
+				Time.IMSAK,
+				sunAngleTime(method.getConfigurationValue(Time.IMSAK),
+						times.get(Time.IMSAK), true));
+		compResult.put(
+				Time.FAJR,
+				sunAngleTime(method.getConfigurationValue(Time.FAJR),
+						times.get(Time.FAJR), true));
+		compResult.put(Time.SUNRISE,
+				sunAngleTime(riseSetAngle(), times.get(Time.SUNRISE), true));
 		compResult.put(Time.DHUHR, midDay(times.get(Time.DHUHR)));
-		compResult.put(Time.ASR, asrTime(method.getAsrFactor(), times.get(Time.ASR)));
-		compResult.put(Time.SUNSET, sunAngleTime(riseSetAngle(), times.get(Time.SUNSET), false));
-		compResult.put(Time.MAGHRIB, sunAngleTime(method.getAngle(Time.MAGHRIB), times.get(Time.MAGHRIB), false));
-		compResult.put(Time.ISHA, sunAngleTime(method.getAngle(Time.ISHA), times.get(Time.ISHA), false));
+		compResult.put(Time.ASR,
+				asrTime(method.getAsrFactor(), times.get(Time.ASR)));
+		compResult.put(Time.SUNSET,
+				sunAngleTime(riseSetAngle(), times.get(Time.SUNSET), false));
+		compResult.put(
+				Time.MAGHRIB,
+				sunAngleTime(method.getConfigurationValue(Time.MAGHRIB),
+						times.get(Time.MAGHRIB), false));
+		compResult.put(
+				Time.ISHA,
+				sunAngleTime(method.getConfigurationValue(Time.ISHA),
+						times.get(Time.ISHA), false));
 
 		return compResult;
 	}
@@ -298,29 +287,31 @@ public class PrayTimes {
 		if (method.getHighLatMethod() != HighLatMethod.NONE)
 			adjustHighLats(times);
 
-		if (method.getMinute(Time.IMSAK) != null)
-			times.put(Time.IMSAK,
-					times.get(Time.FAJR) - method.getMinute(Time.IMSAK) / 60d);
+		if (method.hasMinuteConfiguration(Time.IMSAK))
+			times.put(
+					Time.IMSAK,
+					times.get(Time.FAJR)
+							- method.getConfigurationValue(Time.IMSAK) / 60d);
 
-		if (method.getMinute(Time.MAGHRIB) != null) {
-			times.put(Time.MAGHRIB,
-					times.get(Time.SUNSET) + method.getMinute(Time.MAGHRIB)
-							/ 60d);
+		if (method.hasMinuteConfiguration(Time.MAGHRIB)) {
+			times.put(
+					Time.MAGHRIB,
+					times.get(Time.SUNSET)
+							+ method.getConfigurationValue(Time.MAGHRIB) / 60d);
 		}
 
-		if (method.getMinute(Time.ISHA) != null)
-			times.put(Time.ISHA,
-					times.get(Time.MAGHRIB) + method.getMinute(Time.ISHA) / 60d);
+		if (method.hasMinuteConfiguration(Time.ISHA))
+			times.put(
+					Time.ISHA,
+					times.get(Time.MAGHRIB)
+							+ method.getConfigurationValue(Time.ISHA) / 60d);
 
-		if (method.getMinute(Time.DHUHR) != null)
-			times.put(Time.DHUHR,
-					times.get(Time.DHUHR) + method.getMinute(Time.DHUHR) / 60d);
+		// Minutes of dhuhr
+		times.put(
+				Time.DHUHR,
+				times.get(Time.DHUHR)
+						+ method.getConfigurationValue(Time.DHUHR) / 60d);
 
-		// TODO: Info = Double di JS lebih panjang 1 digit presisi:
-		// Java = 12.02000680274645
-		// JS	= 12.020006802746453
-		// System.out.println("params.dhuhr = " + method.getMinute(Time.DHUHR));
-		// System.out.println("times.dhuhr = " + times.get(Time.DHUHR));
 	}
 
 	private Map<Time, Double> clone(Map<Time, Double> times) {
@@ -361,19 +352,23 @@ public class PrayTimes {
 		times.put(
 				Time.IMSAK,
 				adjustHLTime(times.get(Time.IMSAK), times.get(Time.SUNRISE),
-						method.getAngle(Time.IMSAK), nightTime, true));
+						method.getConfigurationValue(Time.IMSAK), nightTime,
+						true));
 		times.put(
 				Time.FAJR,
 				adjustHLTime(times.get(Time.FAJR), times.get(Time.SUNRISE),
-						method.getAngle(Time.FAJR), nightTime, true));
+						method.getConfigurationValue(Time.FAJR), nightTime,
+						true));
 		times.put(
 				Time.ISHA,
 				adjustHLTime(times.get(Time.ISHA), times.get(Time.SUNSET),
-						method.getAngle(Time.ISHA), nightTime, false));
+						method.getConfigurationValue(Time.ISHA), nightTime,
+						false));
 		times.put(
 				Time.MAGHRIB,
 				adjustHLTime(times.get(Time.MAGHRIB), times.get(Time.SUNSET),
-						method.getAngle(Time.MAGHRIB), nightTime, false));
+						method.getConfigurationValue(Time.MAGHRIB), nightTime,
+						false));
 	}
 
 	// adjust a time for higher latitudes
@@ -410,12 +405,11 @@ public class PrayTimes {
 
 	// compute the difference between two times
 	private double timeDiff(double time1, double time2) {
-		return DMath.fixHour(time2- time1);
+		return DMath.fixHour(time2 - time1);
 	}
 
-
 	/* Test drive ----------------------------------------------------------- */
-// TODO: method sunPosition tidak sama!!!
+	// TODO: method sunPosition tidak sama!!!
 	public static void main(String[] args) {
 		double x = sunPosition(2456497.2032515435 + 0.25).equation;
 		System.out.println("X = " + x);
@@ -423,10 +417,10 @@ public class PrayTimes {
 
 	public static void main2(String[] args) {
 		PrayTimes pt = new PrayTimes(Method.ISNA);
-		pt.adjustAngle(Time.FAJR, 20);
-		pt.adjustMinutes(Time.DHUHR, 2);
-		pt.adjustMinutes(Time.MAGHRIB, 1);
-		pt.adjustAngle(Time.ISHA, 18);
+		pt.adjust(Time.FAJR, angle(20));
+		pt.adjust(Time.DHUHR, minutes(2));
+		pt.adjust(Time.MAGHRIB, minutes(1));
+		pt.adjust(Time.ISHA, angle(18));
 
 		pt.tuneOffset(Time.FAJR, 2);
 		pt.tuneOffset(Time.SUNRISE, -2);
@@ -454,8 +448,8 @@ public class PrayTimes {
 					106.8294444, 10));
 			for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
 					Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
-				System.out.print(t + " : "
-					+ Util.toTime12(times.get(t), false));
+				System.out
+						.print(t + " : " + Util.toTime12(times.get(t), false));
 				System.out.print(",");
 			}
 			// System.out.println();
@@ -470,8 +464,19 @@ public class PrayTimes {
 
 		for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
 				Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
-			System.out.println(t + " : "
-					+ Util.toTime12(times.get(t), false));
+			System.out.println(t + " : " + Util.toTime12(times.get(t), false));
+		}
+	}
+
+	public void adjust(Map<Time, Configuration> adjustments) {
+		for (Entry<Time, Configuration> e : adjustments.entrySet()) {
+			adjust(e.getKey(), e.getValue());
+		}
+	}
+
+	public void tuneOffset(Map<Time, Integer> offsets) {
+		for (Entry<Time, Integer> e : offsets.entrySet()) {
+			tuneOffset(e.getKey(), e.getValue());
 		}
 	}
 }

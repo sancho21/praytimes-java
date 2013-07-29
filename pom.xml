@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.praytimes</groupId>
 	<artifactId>praytimes</artifactId>
-	<version>1.0.0-FINAL</version>
+	<version>2.0.0</version>
 	<name>Praytimes Calculator</name>
 	<description>Calculator of Islamic praytimes based on praytimes.org</description>
 	<packaging>bundle</packaging>
