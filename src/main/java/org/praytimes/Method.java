@@ -255,4 +255,11 @@ public class Method {
 		return m;
 	}
 
+	@Override
+	public String toString() {
+		return "Method [name=" + name + ", configurations=" + configurations
+				+ ", asrFactor=" + asrFactor + ", midnightMethod="
+				+ midnightMethod + ", highLatMethod=" + highLatMethod + "]";
+	}
+
 }

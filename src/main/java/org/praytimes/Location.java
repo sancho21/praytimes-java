@@ -32,4 +32,10 @@ public class Location {
 	public double getElv() {
 		return elv;
 	}
+
+	@Override
+	public String toString() {
+		return "Location [lat=" + lat + ", lng=" + lng + ", elv=" + elv + "]";
+	}
+
 }
