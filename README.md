@@ -14,28 +14,42 @@ In order to use it, just download the library or you may choose to create a JAR 
 	import static org.praytimes.Configuration.angle;
 	import static org.praytimes.Configuration.minutes;
 
-	import java.util.*;
-	import org.praytimes.*;
+	import java.util.GregorianCalendar;
+	import java.util.Map;
 
-	public static void main2(String[] args) {
-		PrayTimes pt = new PrayTimes(Method.ISNA);
-		
-		// Adjustments
-		pt.adjust(Time.FAJR, angle(20));
-		pt.adjust(Time.DHUHR, minutes(2));
+	import org.praytimes.Location;
+	import org.praytimes.Method;
+	import org.praytimes.PrayTimes;
+	import org.praytimes.PrayTimes.Time;
+	import org.praytimes.Util;
 
-		// Offset tunings
-		pt.tuneOffset(Time.FAJR, 2);
-		
-		// Calculate praytimes
-		Location location = new Location(-6.1744444, 106.8294444, 10);
-		Map<Time, Double> times = 
-			pt.getTimes(new GregorianCalendar(), location); // Time offset is included in the calendar
+	public class HelloPrayTimes {
 
-		// Print the result
-		for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
-				Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
-			System.out.println(t + " : " + Util.toTime12(times.get(t), false));
+		public static void main(String[] args) {
+			PrayTimes pt = new PrayTimes(Method.ISNA);
+
+			// Adjustments
+			pt.adjust(Time.FAJR, angle(20));
+			pt.adjust(Time.DHUHR, minutes(2));
+
+			// Offset tunings
+			pt.tuneOffset(Time.FAJR, 2);
+
+			// Calculate praytimes
+			double elevation = 10;
+			double lat = -6.1744444;
+			double lng = 106.8294444;
+			Location location = new Location(lat, lng, elevation);
+			// Timezone is defined in the calendar
+			Map<Time, Double> times = pt
+					.getTimes(new GregorianCalendar(), location);
+
+			// Print the result
+			for (Time t : new Time[] { Time.FAJR, Time.SUNRISE, Time.DHUHR,
+					Time.ASR, Time.MAGHRIB, Time.ISHA, Time.MIDNIGHT }) {
+				System.out.println(t + " : " + Util.toTime12(times.get(t), false));
+			}
 		}
+
 	}
 `````
