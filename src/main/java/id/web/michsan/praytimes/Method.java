@@ -1,12 +1,11 @@
-package org.praytimes;
+package id.web.michsan.praytimes;
 
-import static org.praytimes.Configuration.angle;
-import static org.praytimes.Configuration.minutes;
+import static id.web.michsan.praytimes.Configuration.angle;
+import static id.web.michsan.praytimes.Configuration.minutes;
+import id.web.michsan.praytimes.PrayTimes.Time;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.praytimes.PrayTimes.Time;
 
 /**
  * Calculation method

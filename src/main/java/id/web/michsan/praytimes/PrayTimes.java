@@ -1,7 +1,9 @@
-package org.praytimes;
+package id.web.michsan.praytimes;
 
-import static org.praytimes.Configuration.angle;
-import static org.praytimes.Configuration.minutes;
+import static id.web.michsan.praytimes.Configuration.angle;
+import static id.web.michsan.praytimes.Configuration.minutes;
+import id.web.michsan.praytimes.Method.HighLatMethod;
+import id.web.michsan.praytimes.Method.MidnightMethod;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -9,9 +11,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.praytimes.Method.HighLatMethod;
-import org.praytimes.Method.MidnightMethod;
 
 /**
  * <p>

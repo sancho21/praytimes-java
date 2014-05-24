@@ -1,10 +1,16 @@
-package org.praytimes;
+package id.web.michsan.praytimes;
 
+import static id.web.michsan.praytimes.Configuration.angle;
+import static id.web.michsan.praytimes.Configuration.minutes;
 import static java.util.Calendar.JANUARY;
 import static java.util.Calendar.JULY;
 import static org.junit.Assert.assertEquals;
-import static org.praytimes.Configuration.angle;
-import static org.praytimes.Configuration.minutes;
+import id.web.michsan.praytimes.Configuration;
+import id.web.michsan.praytimes.Location;
+import id.web.michsan.praytimes.Method;
+import id.web.michsan.praytimes.PrayTimes;
+import id.web.michsan.praytimes.Util;
+import id.web.michsan.praytimes.PrayTimes.Time;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -17,7 +23,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.junit.Test;
-import org.praytimes.PrayTimes.Time;
 
 /**
  *

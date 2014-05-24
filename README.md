@@ -11,17 +11,17 @@ In order to use it, just download the library or you may choose to create a JAR 
 `````java
 	package mypackage;
 
-	import static org.praytimes.Configuration.angle;
-	import static org.praytimes.Configuration.minutes;
+	import static id.web.michsan.praytimes.Configuration.angle;
+	import static id.web.michsan.praytimes.Configuration.minutes;
 
 	import java.util.GregorianCalendar;
 	import java.util.Map;
 
-	import org.praytimes.Location;
-	import org.praytimes.Method;
-	import org.praytimes.PrayTimes;
-	import org.praytimes.PrayTimes.Time;
-	import org.praytimes.Util;
+	import id.web.michsan.praytimes.Location;
+	import id.web.michsan.praytimes.Method;
+	import id.web.michsan.praytimes.PrayTimes;
+	import id.web.michsan.praytimes.PrayTimes.Time;
+	import id.web.michsan.praytimes.Util;
 
 	public class HelloPrayTimes {
 

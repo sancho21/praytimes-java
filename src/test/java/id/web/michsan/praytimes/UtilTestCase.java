@@ -1,9 +1,10 @@
-package org.praytimes;
+package id.web.michsan.praytimes;
 
 import static org.junit.Assert.assertEquals;
+import id.web.michsan.praytimes.Util;
+import id.web.michsan.praytimes.Util.DayTime;
 
 import org.junit.Test;
-import org.praytimes.Util.DayTime;
 
 /**
  *

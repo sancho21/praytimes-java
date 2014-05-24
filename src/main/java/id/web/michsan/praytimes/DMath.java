@@ -1,4 +1,4 @@
-package org.praytimes;
+package id.web.michsan.praytimes;
 //import static java.lang.Math.toRadians;
 
 /**

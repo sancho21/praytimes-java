@@ -1,12 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.praytimes</groupId>
+	<groupId>id.web.michsan.praytimes</groupId>
 	<artifactId>praytimes</artifactId>
 	<version>2.0.0</version>
-	<name>Praytimes Calculator</name>
-	<description>Calculator of Islamic praytimes based on praytimes.org</description>
 	<packaging>bundle</packaging>
+
+	<name>Pray Times Calculator</name>
+	<description>Calculator of Islamic pray times based on praytimes.org</description>
+	<url>https://github.com/sancho21/praytimes-java</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Muhammad Ichsan</name>
+			<email>ichsan@gmail.com</email>
+			<url>http://www.michsan.web.id</url>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>https://github.com/sancho21/praytimes-java</url>
+		<connection>scm:git:https://github.com/sancho21/praytimes-java.git</connection>
+		<developerConnection>scm:git:https://github.com/sancho21/praytimes-java.git</developerConnection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,4 +82,34 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
