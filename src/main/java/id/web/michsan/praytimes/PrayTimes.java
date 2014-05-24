@@ -5,10 +5,11 @@ import static id.web.michsan.praytimes.Configuration.minutes;
 import id.web.michsan.praytimes.Method.HighLatMethod;
 import id.web.michsan.praytimes.Method.MidnightMethod;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -409,12 +410,12 @@ public class PrayTimes {
 
 	/* Test drive ----------------------------------------------------------- */
 	// TODO: method sunPosition tidak sama!!!
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
 		double x = sunPosition(2456497.2032515435 + 0.25).equation;
 		System.out.println("X = " + x);
 	}
 
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		PrayTimes pt = new PrayTimes(Method.ISNA);
 		pt.adjust(Time.FAJR, angle(20));
 		pt.adjust(Time.DHUHR, minutes(2));
@@ -436,12 +437,14 @@ public class PrayTimes {
 
 	private static void aYear(PrayTimes pt) {
 		GregorianCalendar cal = new GregorianCalendar(2011, 0, 1);
+		DateFormat format = new SimpleDateFormat("MMM");
 		for (int i = 0; i < 365; i++) {
+
 			System.out.print("@"
 					+ cal.get(Calendar.DAY_OF_MONTH)
 					+ "-"
-					+ cal.getDisplayName(Calendar.MONTH, Calendar.SHORT,
-							Locale.getDefault()) + " = ");
+					+ format.format(cal.getTime())
+					+ " = ");
 
 			Map<Time, Double> times = pt.getTimes(cal, new Location(-6.1744444,
 					106.8294444, 10));
@@ -451,7 +454,6 @@ public class PrayTimes {
 						.print(t + " : " + Util.toTime12(times.get(t), false));
 				System.out.print(",");
 			}
-			// System.out.println();
 
 			cal.add(Calendar.DAY_OF_MONTH, 1);
 		}

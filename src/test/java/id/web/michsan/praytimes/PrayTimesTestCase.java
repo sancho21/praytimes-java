@@ -5,11 +5,6 @@ import static id.web.michsan.praytimes.Configuration.minutes;
 import static java.util.Calendar.JANUARY;
 import static java.util.Calendar.JULY;
 import static org.junit.Assert.assertEquals;
-import id.web.michsan.praytimes.Configuration;
-import id.web.michsan.praytimes.Location;
-import id.web.michsan.praytimes.Method;
-import id.web.michsan.praytimes.PrayTimes;
-import id.web.michsan.praytimes.Util;
 import id.web.michsan.praytimes.PrayTimes.Time;
 
 import java.io.BufferedReader;
@@ -30,6 +25,8 @@ import org.junit.Test;
  *
  */
 public class PrayTimesTestCase {
+	private static final TimeZone SAMPLE_TIME_ZONE = TimeZone.getTimeZone("GMT+7");
+
 	@Test
 	public void shouldWork() {
 		PrayTimes pt = new PrayTimes(Method.ISNA);
@@ -45,6 +42,7 @@ public class PrayTimesTestCase {
 		pt.tuneOffset(Time.ISHA, 2);
 
 		GregorianCalendar cal = new GregorianCalendar(2011, JANUARY, 17);
+		cal.setTimeZone(SAMPLE_TIME_ZONE);
 		Map<Time, Double> times = pt.getTimes(cal, new Location(-6.1744444,
 				106.8294444, 10));
 
@@ -77,6 +75,7 @@ public class PrayTimesTestCase {
 	public void shouldBeTheSameWithJsVersion() throws Exception {
 		String sampleFile = "src/test/file/sample-01.txt";
 		GregorianCalendar cal = new GregorianCalendar(2013, JULY, 24);
+		cal.setTimeZone(SAMPLE_TIME_ZONE);
 		Location location = new Location(-6.1744444, 106.8294444);
 
 		Map<Time, Configuration> adjustments = new HashMap<Time, Configuration>();
