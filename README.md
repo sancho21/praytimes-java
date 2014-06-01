@@ -6,7 +6,19 @@ The Java version of Islamic PrayTimes Calculator in http://praytimes.org
 Usage
 =====
 
-In order to use it, just download the library or you may choose to create a JAR file from the source using Maven build system.
+In order to use it, you may want to use Maven repository:
+
+`````xml
+	<dependencies>
+		<dependency>
+			<groupId>id.web.michsan.praytimes</groupId>
+			<artifactId>praytimes</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+	</dependencies>
+`````
+
+And this is a simple way to code with it.
 
 `````java
 	package mypackage;
