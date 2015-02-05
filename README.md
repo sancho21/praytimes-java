@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/sancho21/praytimes-java.svg?branch=master)](https://travis-ci.org/sancho21/praytimes-java)
+[![Coverage Status](https://coveralls.io/repos/sancho21/praytimes-java/badge.svg?branch=master)](https://coveralls.io/r/sancho21/praytimes-java?branch=master)
+
 PrayTimes in Java
 =================
 
